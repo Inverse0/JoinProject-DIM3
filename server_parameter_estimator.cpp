@@ -13,9 +13,9 @@ using namespace std;
 //L1: 32KB?
 //L2: 256KB?
 //L3: 12MB?
-const unsigned int L1cache_size = 32768; // in bytes
-const unsigned int L2cache_size = 262144; // in bytes
-const unsigned int L3cache_size = 12582912; // in bytes
+const unsigned int L1cache_size = 1153433; // in bytes
+const unsigned int L2cache_size = 31457280; // in bytes
+const unsigned int L3cache_size = 37748736; // in bytes
 //===============
 
 default_random_engine random_engine(492);
