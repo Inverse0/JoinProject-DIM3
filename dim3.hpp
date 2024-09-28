@@ -243,7 +243,7 @@ public:
         nS = S.size();
         // project_set.reserve(OUT_hat);
         group_map.reserve(OUT_hat);
-        
+
         partition_bits = (int)ceil(log2(max((int)max(nR, nS), (__cur_partition_para << 1)) / __cur_partition_para));//TODO
         assert(hash_bucket_bits < 30);
         assert(partition_bits < 30);
@@ -283,7 +283,9 @@ public:
         //     result.push_back(i);
         // }
         result.reserve(group_map.size());
-        for (const auto& [group_key, agg_value] : group_map) {
+        for (const auto& entry : group_map) {
+            const auto& group_key = entry.first;
+            const auto& agg_value = entry.second;
             if (agg_value > 50) {  // Filter by compatibility > 50
                 result.push_back({group_key.first, group_key.second});  // Only store (pid, eid)
             }
