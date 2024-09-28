@@ -221,7 +221,9 @@ private:
 template <typename _Tx, typename _Ty, typename _Tz, typename _H, typename _Hpair, typename _Tcounter = uint32_t>
 struct Radix_hash_join_and_project {
 private:
-    ska::flat_hash_set<pair<_Tx, _Tz>, _Hpair> project_set;
+    // ska::flat_hash_set<pair<_Tx, _Tz>, _Hpair> project_set;
+    ska::flat_hash_map<pair<_Tx, _Tz>, double, _Hpair> group_map;
+
     myvector<myvector<pair<_Tx, _Ty>>> hashBuckets;
     const int __cur_partition_para = __L2cache_size / max(sizeof(pair<_Tz, _Ty>), sizeof(pair<_Tx, _Ty>)) / 2;
     const int hash_bucket_bits = (int)ceil(log2(__L2cache_size / 2 / __cache_line_size));
@@ -239,7 +241,9 @@ public:
         _Tcounter* hist, * psumR, * psumS;
         nR = R.size();
         nS = S.size();
-        project_set.reserve(OUT_hat);
+        // project_set.reserve(OUT_hat);
+        group_map.reserve(OUT_hat);
+        
         partition_bits = (int)ceil(log2(max((int)max(nR, nS), (__cur_partition_para << 1)) / __cur_partition_para));//TODO
         assert(hash_bucket_bits < 30);
         assert(partition_bits < 30);
@@ -274,10 +278,17 @@ public:
         free(pR);
         free(pS);
         
-        result.reserve(project_set.size());
-        for (auto i : project_set) {
-            result.push_back(i);
+        // result.reserve(project_set.size());
+        // for (auto i : project_set) {
+        //     result.push_back(i);
+        // }
+        result.reserve(group_map.size());
+        for (const auto& [group_key, agg_value] : group_map) {
+            if (agg_value > 50) {  // Filter by compatibility > 50
+                result.push_back({group_key.first, group_key.second});  // Only store (pid, eid)
+            }
         }
+
     }
 
 private:
@@ -331,7 +342,10 @@ private:
             auto v_cnt = v.size();
             for (int j = 0; j < v_cnt; j++) {
                 if (S[i].second == v.data[j].second) {
-                    project_set.insert({ v.data[j].first,S[i].first });
+                    // project_set.insert({ v.data[j].first,S[i].first });
+                    auto group_key = make_pair(v.data[j].first, S[i].first);  // (pid, eid)
+                    double compatibility_value = v.data[j].first * S[i].first;  // p.weight * e.value
+                    group_map[group_key] += compatibility_value;  // Accumulate the sum
                 }
             }
         }
@@ -1091,3 +1105,22 @@ void gen_rand_data(
     for (int i = 0; i < nR; i++) R.push_back({ random_engine() % MODX,random_engine() % MODY });
     for (int i = 0; i < nS; i++) S.push_back({ random_engine() % MODZ,random_engine() % MODY });
 }
+
+// void gen_rand_data(
+//         vector<tuple<int, int, int>>& R, vector<tuple<int, int, int>>& S,
+//         int nR = 1e7, int nS = 1e7,
+//         int MODX = 1e6, int MODY = 1e6, int MODZ = 1e6,
+//         int MODW = 1e6,
+//         int seed = 492) {
+    
+//     R.clear();
+//     S.clear();
+
+//     default_random_engine random_engine(seed);
+//     for (int i = 0; i < nR; i++) {
+//         R.push_back(make_tuple(random_engine() % MODX, random_engine() % MODY, random_engine() % MODW));
+//     }
+//     for (int i = 0; i < nS; i++) {
+//         S.push_back(make_tuple(random_engine() % MODZ, random_engine() % MODY, random_engine() % MODW));
+//     }
+// }

@@ -1,5 +1,6 @@
 #include"dim3.hpp"
 
+
 // Input table R(x,y), S(z,y)
 myvector<pair<int, int>> R, S;
 
