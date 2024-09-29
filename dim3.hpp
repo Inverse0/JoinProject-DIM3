@@ -1135,7 +1135,7 @@ void baseline_mapping(const myvector<pair<int, int>> R, const myvector<pair<int,
 
 void gen_rand_data(
         myvector<pair<int, int>>& R, myvector<pair<int, int>>& S,
-        int nR = 1e5, int nS = 1e5,
+        int nR = 1e6, int nS = 1e6,
         int MODX = 1e6, int MODY = 1e6, int MODZ = 1e6,
         int seed = 492) {
     
