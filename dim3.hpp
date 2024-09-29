@@ -800,15 +800,15 @@ public:
         LL OUT_J_hat = EstimateJoinCardinality<_Tx, _Ty, _Tz, _Hy, _Tcounter>::estimate(R, S);
         cout << "[i] OUT_J_hat= " << OUT_J_hat << endl;
 
-        // if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
-        //     //Radix hash
-        //     cout << "[i] Use Radix hash" << endl;
+        if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
+            //Radix hash
+            cout << "[i] Use Radix hash" << endl;
 
-        //     Radix_hash_join_and_project<_Tx, _Ty, _Tz, _Hy, _Hxz> classical_solution;
-        //     classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
+            Radix_hash_join_and_project<_Tx, _Ty, _Tz, _Hy, _Hxz> classical_solution;
+            classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
 
-        //     return;
-        // }
+            return;
+        }
 
         // hybrid solution
         cout << "[i] Use hybrid solution" << endl;
@@ -1137,7 +1137,7 @@ void baseline_mapping(const myvector<pair<int, int>> R, const myvector<pair<int,
 
 void gen_rand_data(
         myvector<pair<int, int>>& R, myvector<pair<int, int>>& S,
-        int nR = 1e6, int nS = 1e6,
+        int nR = 1e7, int nS = 1e7,
         int MODX = 1e4, int MODY = 1e6, int MODZ = 1e4,
         int seed = 492) {
     
