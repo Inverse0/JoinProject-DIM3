@@ -759,7 +759,7 @@ public:
                             // Accumulate the aggregate for this group
                             SPAw[cur_z] += origin_x_val * ID2V.z[cur_z];
                         }
-                        cout << SPAw[cur_z];
+                        // cout << SPAw[cur_z];
                     }
                 }
                 for (int cur_z = 0; cur_z < nz; cur_z++) {
@@ -1137,7 +1137,7 @@ void baseline_mapping(const myvector<pair<int, int>> R, const myvector<pair<int,
 
 void gen_rand_data(
         myvector<pair<int, int>>& R, myvector<pair<int, int>>& S,
-        int nR = 1e5, int nS = 1e5,
+        int nR = 1e6, int nS = 1e6,
         int MODX = 1e4, int MODY = 1e6, int MODZ = 1e4,
         int seed = 492) {
     
