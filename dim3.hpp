@@ -653,6 +653,8 @@ public:
                                 myvector<pair<_Tx,_Tz>, _Tcounter>& result, size_t reserve_size/*?*/) {
         result.reserve(reserve_size);
 
+        ska::flat_hash_map<pair<_Tx, _Tz>, double> group_map;
+
         if (S_dense.size > 0) {
             //DenseEC
             int dense_bitvector_len = S_dense.dense_bitvector_len;
@@ -713,11 +715,14 @@ public:
                 }
             }
             // After processing all cur_x and cur_z, filter results with compatibility > 50
-            for (const auto& [group_key, agg_value] : group_map) {
+            for (const auto& entry : group_map) {
+                const auto& group_key = entry.first;
+                const auto& agg_value = entry.second;
                 if (agg_value > 50) {
-                    result.push_back({group_key.first, group_key.second});  // Push (pid, eid) where compatibility > 50
+                    result.push_back(std::make_pair(group_key.first, group_key.second));
                 }
             }
+
 
             free(origin_z_val);
             free(f3_threshold_cache);
