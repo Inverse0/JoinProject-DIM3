@@ -645,7 +645,7 @@ private:
 };
 
 
-template <typename _Tx, /*typename _Ty,*/ typename _Tz, typename _Tcounter = uint32_t>
+template <typename _Tx, /*typename _Ty,*/ typename _Tz, typename _Hpair, typename _Tcounter = uint32_t>
 struct Hybrid_solution {
 public:
     static void dojoinproject(CSR<>& R_all, S_DENSE& S_dense, CSR<>& S_sparse, ID2VALUE<_Tx,_Tz>& ID2V,
@@ -653,7 +653,7 @@ public:
                                 myvector<pair<_Tx,_Tz>, _Tcounter>& result, size_t reserve_size/*?*/) {
         result.reserve(reserve_size);
 
-        ska::flat_hash_map<pair<_Tx, _Tz>, double> group_map;
+        ska::flat_hash_map<pair<_Tx, _Tz>, double, _Hpair> group_map;
 
         if (S_dense.size > 0) {
             //DenseEC
@@ -838,7 +838,7 @@ public:
         free(Rm.data);
         free(Sm.data);
 
-        Hybrid_solution<_Tx, _Tz, _Tcounter>::dojoinproject(R_all, S_dense, S_sparse, ID2V, n, k, m, result, min(OUT_J_hat*3, (LL)n * m));
+        Hybrid_solution<_Tx, _Tz, _Hxz, _Tcounter>::dojoinproject(R_all, S_dense, S_sparse, ID2V, n, k, m, result, min(OUT_J_hat*3, (LL)n * m));
 
         // cout << "[i] |S_dense|=" << S_dense.size << " (" << (double)S_dense.size / m * 100. << "%)" << endl;
 
