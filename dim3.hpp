@@ -653,7 +653,8 @@ public:
                                 myvector<pair<_Tx,_Tz>, _Tcounter>& result, size_t reserve_size/*?*/) {
         result.reserve(reserve_size);
 
-        ska::flat_hash_map<pair<_Tx, _Tz>, double> group_map;
+        // ska::flat_hash_map<pair<_Tx, _Tz>, double> group_map;
+        ska::flat_hash_map<pair<_Tx, _Tz>, double, _Hpair> group_map;
 
         if (S_dense.size > 0) {
             //DenseEC
