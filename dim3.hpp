@@ -744,13 +744,13 @@ public:
                 for (int i = R_all.JR[cur_x], _i = R_all.JR[cur_x + 1]; i < _i; i++) {
                     int cur_y = R_all.IC[i];
                     for (int j = S_sparse.JR[cur_y], _j = S_sparse.JR[cur_y + 1]; j < _j; j++) {
-                        int cur_z = S_sparse.IC[j];
 
                         // if (SPAw[S_sparse.IC[j]] != cur_x) {
                         //     SPAw[S_sparse.IC[j]] = cur_x;
                         //     result.push_back({ origin_x_val,ID2V.z[S_sparse.IC[j]] });
                         // }
-
+                        
+                        int cur_z = S_sparse.IC[j];
                         if (SPAw[cur_z] == -1) {
                             // First time encountering this combination in this iteration of cur_x
                             SPAw[cur_z] = origin_x_val * ID2V.z[cur_z];
@@ -795,20 +795,20 @@ public:
         // R larger
 
         LL OUT_J_hat = EstimateJoinCardinality<_Tx, _Ty, _Tz, _Hy, _Tcounter>::estimate(R, S);
-        // cout << "[i] OUT_J_hat= " << OUT_J_hat << endl;
+        cout << "[i] OUT_J_hat= " << OUT_J_hat << endl;
 
-        // if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
-        //     //Radix hash
-        //     // cout << "[i] Use Radix hash" << endl;
+        if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
+            //Radix hash
+            // cout << "[i] Use Radix hash" << endl;
 
-        //     Radix_hash_join_and_project<_Tx, _Ty, _Tz, _Hy, _Hxz> classical_solution;
-        //     classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
+            Radix_hash_join_and_project<_Tx, _Ty, _Tz, _Hy, _Hxz> classical_solution;
+            classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
 
-        //     return;
-        // }
+            return;
+        }
 
-        //hybrid solution
-        // cout << "[i] Use hybrid solution" << endl;
+        hybrid solution
+        cout << "[i] Use hybrid solution" << endl;
 
         int n, k, m;
         int xmax, ymax, zmax;
@@ -1134,7 +1134,7 @@ void baseline_mapping(const myvector<pair<int, int>> R, const myvector<pair<int,
 
 void gen_rand_data(
         myvector<pair<int, int>>& R, myvector<pair<int, int>>& S,
-        int nR = 1e4, int nS = 1e4,
+        int nR = 1e5, int nS = 1e5,
         int MODX = 1e6, int MODY = 1e6, int MODZ = 1e6,
         int seed = 492) {
     
