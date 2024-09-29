@@ -655,7 +655,7 @@ public:
 
         ska::flat_hash_map<pair<_Tx, _Tz>, double, _Hpair> group_map;
 
-        if (S_dense.size > 0) {
+        if (S_dense.size < 0) {
             //DenseEC
             int dense_bitvector_len = S_dense.dense_bitvector_len;
             myBitVector<int> dense_x_bitvector(dense_bitvector_len);
