@@ -751,7 +751,7 @@ public:
                         // }
                         
                         int cur_z = S_sparse.IC[j];
-                        cout << origin_x_val * ID2V.z[cur_z]
+                        cout << origin_x_val * ID2V.z[cur_z];
                         if (SPAw[cur_z] == -1) {
                             // First time encountering this combination in this iteration of cur_x
                             SPAw[cur_z] = origin_x_val * ID2V.z[cur_z];
