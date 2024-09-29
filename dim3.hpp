@@ -730,14 +730,14 @@ public:
         }
 
         if (S_sparse.JR != NULL) {
-            // int *SPAw = (int*)malloc(nz * sizeof(int));
-            double *SPAw = (double*)malloc(nz * sizeof(double));
+            int *SPAw = (int*)malloc(nz * sizeof(int));
+            // double *SPAw = (double*)malloc(nz * sizeof(double));
             if (SPAw == NULL) {
                 printf("Fail to malloc SPAw in SPMX.\n");
                 exit(-1);
             }
-            // memset(SPAw, -1, nz * sizeof(int));
-            memset(SPAw, -1, nz * sizeof(double));
+            memset(SPAw, -1, nz * sizeof(int));
+            // memset(SPAw, -1, nz * sizeof(double));
 
             for (int cur_x = 0; cur_x < nx; cur_x++) {
                 int origin_x_val = ID2V.x[cur_x];
@@ -751,7 +751,7 @@ public:
                         // }
                         
                         int cur_z = S_sparse.IC[j];
-                        cout << origin_x_val * ID2V.z[cur_z];
+                        // cout << origin_x_val * ID2V.z[cur_z];
                         if (SPAw[cur_z] == -1) {
                             // First time encountering this combination in this iteration of cur_x
                             SPAw[cur_z] = origin_x_val * ID2V.z[cur_z];
@@ -759,6 +759,7 @@ public:
                             // Accumulate the aggregate for this group
                             SPAw[cur_z] += origin_x_val * ID2V.z[cur_z];
                         }
+                        cout << SPAw[cur_z];
                     }
                 }
                 for (int cur_z = 0; cur_z < nz; cur_z++) {
