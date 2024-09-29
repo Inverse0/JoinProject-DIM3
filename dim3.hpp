@@ -655,79 +655,79 @@ public:
 
         ska::flat_hash_map<pair<_Tx, _Tz>, double, _Hpair> group_map;
 
-        if (S_dense.size < 0) {
-            //DenseEC
-            int dense_bitvector_len = S_dense.dense_bitvector_len;
-            myBitVector<int> dense_x_bitvector(dense_bitvector_len);
-            int* origin_z_val = (int*)malloc(S_dense.size * sizeof(int));
-            int* f3_threshold_cache= (int*)malloc(ny * sizeof(int));
-            if (origin_z_val == NULL || f3_threshold_cache == NULL) {
-                printf("Fail to malloc origin_z_val/f3_threshold_cache in SPMX.\n");
-                exit(-1);
-            }
-            for (int i = 0; i < S_dense.size; i++) {
-                origin_z_val[i] = ID2V.z[S_dense.id2v[i]];
-            }
-            memset(f3_threshold_cache,-1,ny * sizeof(int));
-            for (int i = 0; i < nx; i++) {
-                if (R_all.JR[i + 1] - R_all.JR[i] == 0) continue;
-                int origin_x_val = ID2V.x[i];
-                bool is_dense_bitvector_initialized = false;
-                int _t=R_all.JR[i + 1] - R_all.JR[i];
-                if (f3_threshold_cache[_t]==-1) f3_threshold_cache[_t]=f3_threshold::cal_SIMD_method_threshold(_t, ny);
-                int nsthreshold = f3_threshold_cache[_t];
-                for (int j = 0; j < S_dense.size; j++) {
+        // if (S_dense.size > 0) {
+        //     //DenseEC
+        //     int dense_bitvector_len = S_dense.dense_bitvector_len;
+        //     myBitVector<int> dense_x_bitvector(dense_bitvector_len);
+        //     int* origin_z_val = (int*)malloc(S_dense.size * sizeof(int));
+        //     int* f3_threshold_cache= (int*)malloc(ny * sizeof(int));
+        //     if (origin_z_val == NULL || f3_threshold_cache == NULL) {
+        //         printf("Fail to malloc origin_z_val/f3_threshold_cache in SPMX.\n");
+        //         exit(-1);
+        //     }
+        //     for (int i = 0; i < S_dense.size; i++) {
+        //         origin_z_val[i] = ID2V.z[S_dense.id2v[i]];
+        //     }
+        //     memset(f3_threshold_cache,-1,ny * sizeof(int));
+        //     for (int i = 0; i < nx; i++) {
+        //         if (R_all.JR[i + 1] - R_all.JR[i] == 0) continue;
+        //         int origin_x_val = ID2V.x[i];
+        //         bool is_dense_bitvector_initialized = false;
+        //         int _t=R_all.JR[i + 1] - R_all.JR[i];
+        //         if (f3_threshold_cache[_t]==-1) f3_threshold_cache[_t]=f3_threshold::cal_SIMD_method_threshold(_t, ny);
+        //         int nsthreshold = f3_threshold_cache[_t];
+        //         for (int j = 0; j < S_dense.size; j++) {
 
-                    if (S_dense.id2cnt[j] > nsthreshold) {
-                        //SIMD method
-                        if (!is_dense_bitvector_initialized) {
-                            memset(dense_x_bitvector._Array, 0, dense_bitvector_len * sizeof(int));
-                            for (int j = R_all.JR[i]; j < R_all.JR[i + 1]; j++) {
-                                dense_x_bitvector.setTrue(R_all.IC[j]);
-                            }
-                            is_dense_bitvector_initialized = true;
-                        }
+        //             if (S_dense.id2cnt[j] > nsthreshold) {
+        //                 //SIMD method
+        //                 if (!is_dense_bitvector_initialized) {
+        //                     memset(dense_x_bitvector._Array, 0, dense_bitvector_len * sizeof(int));
+        //                     for (int j = R_all.JR[i]; j < R_all.JR[i + 1]; j++) {
+        //                         dense_x_bitvector.setTrue(R_all.IC[j]);
+        //                     }
+        //                     is_dense_bitvector_initialized = true;
+        //                 }
 
-                        int* z_bitvector_array = S_dense.data[j]._Array;
-                        for (int t = 0; t < dense_bitvector_len; t += 8) {
-                            __m256i a = _mm256_loadu_si256((__m256i*)(z_bitvector_array + t));
-                            __m256i b = _mm256_loadu_si256((__m256i*)(dense_x_bitvector._Array + t));
-                            if (_mm256_testz_si256(a, b) == 0) {
-                                // result.push_back({ origin_x_val,origin_z_val[j] });
+        //                 int* z_bitvector_array = S_dense.data[j]._Array;
+        //                 for (int t = 0; t < dense_bitvector_len; t += 8) {
+        //                     __m256i a = _mm256_loadu_si256((__m256i*)(z_bitvector_array + t));
+        //                     __m256i b = _mm256_loadu_si256((__m256i*)(dense_x_bitvector._Array + t));
+        //                     if (_mm256_testz_si256(a, b) == 0) {
+        //                         // result.push_back({ origin_x_val,origin_z_val[j] });
 
-                                group_map[{origin_x_val, origin_z_val[j]}] += origin_x_val * origin_z_val[j];
+        //                         group_map[{origin_x_val, origin_z_val[j]}] += origin_x_val * origin_z_val[j];
 
-                                break;
-                            }
-                        }
-                    }
-                    else {
-                        //non-SIMD method
-                        for (int t = R_all.JR[i]; t < R_all.JR[i + 1]; t++) {
-                            if (S_dense.data[j].checkIfTrue(R_all.IC[t])) {
-                                // result.push_back({ origin_x_val,origin_z_val[j] });
+        //                         break;
+        //                     }
+        //                 }
+        //             }
+        //             else {
+        //                 //non-SIMD method
+        //                 for (int t = R_all.JR[i]; t < R_all.JR[i + 1]; t++) {
+        //                     if (S_dense.data[j].checkIfTrue(R_all.IC[t])) {
+        //                         // result.push_back({ origin_x_val,origin_z_val[j] });
 
-                                group_map[{origin_x_val, origin_z_val[j]}] += origin_x_val * origin_z_val[j];
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            // After processing all cur_x and cur_z, filter results with compatibility > 50
-            for (const auto& entry : group_map) {
-                const auto& group_key = entry.first;
-                const auto& agg_value = entry.second;
-                if (agg_value > 50) {
-                    result.push_back({group_key.first, group_key.second});
-                }
-            }
+        //                         group_map[{origin_x_val, origin_z_val[j]}] += origin_x_val * origin_z_val[j];
+        //                         break;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     // After processing all cur_x and cur_z, filter results with compatibility > 50
+        //     for (const auto& entry : group_map) {
+        //         const auto& group_key = entry.first;
+        //         const auto& agg_value = entry.second;
+        //         if (agg_value > 50) {
+        //             result.push_back({group_key.first, group_key.second});
+        //         }
+        //     }
 
 
-            free(origin_z_val);
-            free(f3_threshold_cache);
-            free(dense_x_bitvector._Array);
-        }
+        //     free(origin_z_val);
+        //     free(f3_threshold_cache);
+        //     free(dense_x_bitvector._Array);
+        // }
 
         if (S_sparse.JR != NULL) {
             // int *SPAw = (int*)malloc(nz * sizeof(int));
