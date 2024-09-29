@@ -758,7 +758,7 @@ public:
                             // Accumulate the aggregate for this group
                             SPAw[cur_z] += origin_x_val * ID2V.z[cur_z];
                         }
-                        cout << SPAw[cur_z]
+                        cout << SPAw[cur_z];
                     }
                 }
                 for (int cur_z = 0; cur_z < nz; cur_z++) {
