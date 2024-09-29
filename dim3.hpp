@@ -800,7 +800,7 @@ public:
         LL OUT_J_hat = EstimateJoinCardinality<_Tx, _Ty, _Tz, _Hy, _Tcounter>::estimate(R, S);
         cout << "[i] OUT_J_hat= " << OUT_J_hat << endl;
 
-        // if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
+        if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
             //Radix hash
             cout << "[i] Use Radix hash" << endl;
 
@@ -808,7 +808,7 @@ public:
             classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
 
             return;
-        // }
+        }
 
         // hybrid solution
         cout << "[i] Use hybrid solution" << endl;
