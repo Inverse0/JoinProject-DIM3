@@ -720,7 +720,7 @@ public:
                 const auto& group_key = entry.first;
                 const auto& agg_value = entry.second;
                 if (agg_value > 50) {
-                    result.push_back(std::make_pair(group_key.first, group_key.second));
+                    result.push_back({group_key.first, group_key.second});
                 }
             }
 
