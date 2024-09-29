@@ -675,6 +675,7 @@ public:
                 if (f3_threshold_cache[_t]==-1) f3_threshold_cache[_t]=f3_threshold::cal_SIMD_method_threshold(_t, ny);
                 int nsthreshold = f3_threshold_cache[_t];
                 for (int j = 0; j < S_dense.size; j++) {
+
                     if (S_dense.id2cnt[j] > nsthreshold) {
                         //SIMD method
                         if (!is_dense_bitvector_initialized) {
@@ -690,7 +691,10 @@ public:
                             __m256i a = _mm256_loadu_si256((__m256i*)(z_bitvector_array + t));
                             __m256i b = _mm256_loadu_si256((__m256i*)(dense_x_bitvector._Array + t));
                             if (_mm256_testz_si256(a, b) == 0) {
-                                result.push_back({ origin_x_val,origin_z_val[j] });
+                                // result.push_back({ origin_x_val,origin_z_val[j] });
+
+                                group_map[{origin_x_val, origin_z_val[j]}] += origin_x_val * origin_z_val[j];
+
                                 break;
                             }
                         }
@@ -699,37 +703,66 @@ public:
                         //non-SIMD method
                         for (int t = R_all.JR[i]; t < R_all.JR[i + 1]; t++) {
                             if (S_dense.data[j].checkIfTrue(R_all.IC[t])) {
-                                result.push_back({ origin_x_val,origin_z_val[j] });
+                                // result.push_back({ origin_x_val,origin_z_val[j] });
+
+                                group_map[{origin_x_val, origin_z_val[j]}] += origin_x_val * origin_z_val[j];
                                 break;
                             }
                         }
                     }
                 }
             }
+            // After processing all cur_x and cur_z, filter results with compatibility > 50
+            for (const auto& [group_key, agg_value] : group_map) {
+                if (agg_value > 50) {
+                    result.push_back({group_key.first, group_key.second});  // Push (pid, eid) where compatibility > 50
+                }
+            }
+
             free(origin_z_val);
             free(f3_threshold_cache);
             free(dense_x_bitvector._Array);
         }
 
         if (S_sparse.JR != NULL) {
-            int *SPAw = (int*)malloc(nz * sizeof(int));
+            // int *SPAw = (int*)malloc(nz * sizeof(int));
+            double *SPAw = (double*)malloc(nz * sizeof(double));
             if (SPAw == NULL) {
                 printf("Fail to malloc SPAw in SPMX.\n");
                 exit(-1);
             }
-            memset(SPAw, -1, nz * sizeof(int));
+            // memset(SPAw, -1, nz * sizeof(int));
+            memset(SPAw, -1, nz * sizeof(double));
 
             for (int cur_x = 0; cur_x < nx; cur_x++) {
                 int origin_x_val = ID2V.x[cur_x];
                 for (int i = R_all.JR[cur_x], _i = R_all.JR[cur_x + 1]; i < _i; i++) {
                     int cur_y = R_all.IC[i];
                     for (int j = S_sparse.JR[cur_y], _j = S_sparse.JR[cur_y + 1]; j < _j; j++) {
-                        if (SPAw[S_sparse.IC[j]] != cur_x) {
-                            SPAw[S_sparse.IC[j]] = cur_x;
-                            result.push_back({ origin_x_val,ID2V.z[S_sparse.IC[j]] });
+                        int cur_z = S_sparse.IC[j];
+
+                        // if (SPAw[S_sparse.IC[j]] != cur_x) {
+                        //     SPAw[S_sparse.IC[j]] = cur_x;
+                        //     result.push_back({ origin_x_val,ID2V.z[S_sparse.IC[j]] });
+                        // }
+
+                        if (SPAw[cur_z] == -1) {
+                            // First time encountering this combination in this iteration of cur_x
+                            SPAw[cur_z] = origin_x_val * ID2V.z[cur_z];
+                        } else {
+                            // Accumulate the aggregate for this group
+                            SPAw[cur_z] += origin_x_val * ID2V.z[cur_z];
                         }
                     }
                 }
+                for (int cur_z = 0; cur_z < nz; cur_z++) {
+                    if (SPAw[cur_z] > 50) {
+                        result.push_back({origin_x_val, ID2V.z[cur_z]});  // Only push back pairs with compatibility > 50
+                    }
+                }
+                // Reset SPAw for the next cur_x iteration
+                memset(SPAw, -1, nz * sizeof(double));
+
             }
             free(SPAw);
         }
@@ -759,15 +792,15 @@ public:
         LL OUT_J_hat = EstimateJoinCardinality<_Tx, _Ty, _Tz, _Hy, _Tcounter>::estimate(R, S);
         // cout << "[i] OUT_J_hat= " << OUT_J_hat << endl;
 
-        // if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
+        if (f1_threshold::is_classical_batter(R.size(), S.size(), OUT_J_hat)) {
             //Radix hash
             // cout << "[i] Use Radix hash" << endl;
 
-        Radix_hash_join_and_project<_Tx, _Ty, _Tz, _Hy, _Hxz> classical_solution;
-        classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
+            Radix_hash_join_and_project<_Tx, _Ty, _Tz, _Hy, _Hxz> classical_solution;
+            classical_solution.dojoinproject(R, S, (uint32_t)min(OUT_J_hat, (LL)1e8), result);
 
-        return;
-        // }
+            return;
+        }
 
         //hybrid solution
         // cout << "[i] Use hybrid solution" << endl;
