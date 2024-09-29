@@ -768,7 +768,8 @@ public:
                     }
                 }
                 // Reset SPAw for the next cur_x iteration
-                memset(SPAw, -1, nz * sizeof(double));
+                memset(SPAw, -1, nz * sizeof(int));
+                // memset(SPAw, -1, nz * sizeof(double));
 
             }
             free(SPAw);
@@ -1137,7 +1138,7 @@ void baseline_mapping(const myvector<pair<int, int>> R, const myvector<pair<int,
 void gen_rand_data(
         myvector<pair<int, int>>& R, myvector<pair<int, int>>& S,
         int nR = 1e5, int nS = 1e5,
-        int MODX = 1e6, int MODY = 1e6, int MODZ = 1e6,
+        int MODX = 1e4, int MODY = 1e6, int MODZ = 1e4,
         int seed = 492) {
     
     R.clear();
