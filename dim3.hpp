@@ -807,8 +807,8 @@ public:
             return;
         }
 
-        hybrid solution
-        cout << "[i] Use hybrid solution" << endl;
+        // hybrid solution
+        // cout << "[i] Use hybrid solution" << endl;
 
         int n, k, m;
         int xmax, ymax, zmax;
